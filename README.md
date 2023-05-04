@@ -1,7 +1,7 @@
 # version 0.1
 
 # version 0.2
-实现namespace  
+实现UTS Namespace
 
 ## 什么是namespace
 Namespace 是 Linux 内核用来**隔离内核资源**的方式，是对**全局系统资源**的一种封装隔离，使得处于不同 namespace 的进程拥有独立的全局系统资源，改变一个 namespace 中的系统资源只会影响当前 namespace 里的进程，对其他 namespace 中的进程没有影响，但实际上它们共享同一个物理主机的资源，这样，不同的容器就可以在同一台主机上运行不同的应用程序，而不会互相影响，从而实现更高效、更灵活的应用部署。
@@ -33,4 +33,47 @@ sudo unshare --fork --pid --mount-proc bash
 `--fork`: 在新的命名空间中创建一个子进程。  
 `--pid`: 创建一个新的PID命名空间，使得新的进程在这个命名空间中运行。  
 `--mount-proc`: 在新的命名空间中，挂载一个新的/proc文件系统，使得新的进程可以看到这个文件系统中的进程信息。  
-`bash`: 在新的命名空间中启动一个新的 Bash shell。  
+`bash`: 在新的命名空间中启动一个新的 Bash shell。
+
+#### Issues
+```
+panic: fork/exec /bin/sh: operation not permitted
+
+goroutine 1 [running]:
+main.run()
+/go/src/main.go:28 +0x15c
+main.main()
+/go/src/main.go:13 +0xcc
+```
+#### Solution
+```
+docker run -itd --privileged golang
+```
+
+#### Ref
+exec.Command: https://pkg.go.dev/os/exec@go1.18.3#Command  
+SysProcAttr: https://pkg.go.dev/syscall@go1.18.3#SysProcAttr
+
+# version 0.3
+Use make && makefile
+1. 新增makefile，内容如下：
+```makefile
+CMD=go
+BIN_PATH=bin
+SRC_PATH=src
+
+all: clean build install
+
+build: 
+	$(CMD) build -o $(BIN_PATH)/docker $(SRC_PATH)/*
+
+install:
+	cp bin/docker /usr/bin/docker
+	cp bin/docker /usr/local/bin/docker
+
+uninstall:
+	rm -rf /usr/bin/docker /usr/local/bin/docker
+	rm -rf bin/docker
+
+clean: uninstall
+```

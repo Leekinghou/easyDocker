@@ -15,14 +15,13 @@ func main() {
 	case "child":
 		child()
 	default:
-		panic("have not defined")
+		panic("have not defined.")
 	}
 }
-
 func run() {
-	cmd := exec.Command(os.Args[2], append([]string{"child"}, os.Args[2])...)
+	cmd := exec.Command(os.Args[0], append([]string{"child"}, os.Args[2])...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID, // linux特有
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID,
 	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
@@ -31,7 +30,6 @@ func run() {
 		panic(err)
 	}
 }
-
 func child() {
 	cmd := exec.Command(os.Args[2])
 	syscall.Sethostname([]byte("container"))
