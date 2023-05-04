@@ -22,7 +22,7 @@ func main() {
 func run() {
 	cmd := exec.Command(os.Args[2], append([]string{"child"}, os.Args[2])...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{
-		Cloneflags: syscall.CLONE_NEWUTS, // linux特有
+		Cloneflags: syscall.CLONE_NEWUTS | syscall.CLONE_NEWPID, // linux特有
 	}
 	cmd.Stdin = os.Stdin
 	cmd.Stdout = os.Stdout
